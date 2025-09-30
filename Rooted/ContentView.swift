@@ -8,6 +8,8 @@
 import SwiftUI
 import Foundation
 
+import SwiftUI
+
 struct ContentView: View {
     let bible: Bible = BibleProvider.shared
     @State private var selectedBook: Book?
@@ -16,19 +18,17 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(bible.books, selection: $selectedBook) { book in
-                Text(book.name)
-                    .onTapGesture {
-                        selectedBook = book
-                    }
+                NavigationLink(value: book) {
+                    Text(book.name)
+                }
             }
             .navigationTitle("Books")
         } content: {
             if let book = selectedBook {
                 List(book.chapters, selection: $selectedChapter) { chapter in
-                    Text(chapter.chapterNumber.description)
-                        .onTapGesture {
-                            selectedChapter = chapter
-                        }
+                    NavigationLink(value: chapter) {
+                        Text("Chapter \(chapter.chapterNumber)")
+                    }
                 }
                 .navigationTitle("Chapters")
             } else {
@@ -45,13 +45,16 @@ struct ContentView: View {
                     }
                     .padding()
                 }
-                .navigationTitle("\(selectedBook?.name.appending(":") ?? "") \(chapter.chapterNumber): 1-\(chapter.verses.count)")
+                .navigationTitle(
+                    "\(selectedBook?.name ?? "") \(chapter.chapterNumber):1-\(chapter.verses.count)"
+                )
             } else {
                 Text("Select a Chapter")
             }
         }
     }
 }
+
 
 
 #Preview {
