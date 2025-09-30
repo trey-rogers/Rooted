@@ -7,7 +7,8 @@
 import Foundation
 
 // MARK: - Chapter
-struct Chapter: Codable {
+struct Chapter: Codable, Identifiable, Hashable, Equatable {
+    let id: UUID = UUID()
     let chapterNumber: Int
     let verses: [Verse]
 }

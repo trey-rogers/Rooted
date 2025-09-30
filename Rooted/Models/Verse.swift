@@ -7,7 +7,8 @@
 import Foundation
 
 // MARK: - Verse
-struct Verse: Codable {
+struct Verse: Codable, Identifiable, Hashable, Equatable {
+    let id: UUID = UUID()
     let verseNumber: Int
     let text: String
 }
