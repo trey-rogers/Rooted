@@ -8,6 +8,5 @@ import Foundation
 
 // MARK: - Bible
 struct Bible: Codable {
-    let translation: String
     let books: [Book]
 }
