@@ -27,7 +27,14 @@ struct ContentView: View {
                     selectedChapter: $selectedChapter
                 )
             } else {
-                Text("Select a Book")
+                VStack {
+                    Image(systemName: "hand.tap")
+                        .resizable()
+                        .frame(width: 100, height: 100)
+                    Text("Select a Book")
+                        .font(.title2)
+                }
+                .opacity(0.25)
             }
         } detail: {
             if let chapter = selectedChapter, let book = selectedBook {
@@ -36,7 +43,14 @@ struct ContentView: View {
                     bookName: book.name
                 )
             } else {
-                Text("Select a Chapter")
+                VStack {
+                    Image(systemName: "hand.tap")
+                        .resizable()
+                        .frame(width: 100, height: 100)
+                    Text("Select a Chapter")
+                        .font(.title2)
+                }
+                .opacity(0.25)
             }
         }
     }
