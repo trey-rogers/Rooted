@@ -17,6 +17,5 @@ struct ChaptersSidebarView: View {
             }
         }
         .navigationTitle("Chapters")
-        .frame(width: 200)
     }
 }

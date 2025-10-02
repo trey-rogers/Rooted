@@ -27,5 +27,6 @@ struct ChapterDetailView: View {
         .navigationTitle(
             "\(bookName) \(chapter.chapterNumber):1-\(chapter.verses.count)"
         )
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -18,6 +18,5 @@ struct BooksSidebarView: View {
             }
         }
         .navigationTitle("Books")
-        .frame(width: 200)
     }
 }
