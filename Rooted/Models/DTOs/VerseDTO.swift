@@ -11,10 +11,11 @@ struct VerseDTO: Codable {
 }
 
 extension VerseDTO {
-    func toModel() -> Verse {
+    func toModel(order: Int) -> Verse {
         Verse(
             verseNumber: verseNumber,
-            text: text
+            text: text,
+            order: order
         )
     }
 }

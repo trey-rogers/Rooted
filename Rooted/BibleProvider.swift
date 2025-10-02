@@ -23,8 +23,8 @@ final class BibleProvider {
             let decoder = JSONDecoder()
             let bible = try decoder.decode(Bible.self, from: data)
 
-            for bookDTO in bible.books {
-                let book = bookDTO.toModel()
+            for (index, bookDTO) in bible.books.enumerated() {
+                let book = bookDTO.toModel(order: index)
                 context.insert(book)
             }
 

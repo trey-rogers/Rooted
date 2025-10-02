@@ -14,7 +14,7 @@ struct ChapterDetailView: View {
         HStack(alignment: .top, spacing: 16) {
             ScrollView {
                 VStack(alignment: .leading) {
-                    ForEach(chapter.verses, id: \.id) { verse in
+                    ForEach(chapter.verses.sorted(by: { $0.order < $1.order })) { verse in
                         Text("\(verse.verseNumber) \(verse.text)")
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }

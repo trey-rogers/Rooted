@@ -8,9 +8,9 @@ import SwiftUI
 import SwiftData
 
 struct BooksSidebarView: View {
-    @Query var books: [Book]
+    @Query(sort: \Book.order, order: .forward) var books: [Book]
     @Binding var selectedBook: Book?
-    
+
     var body: some View {
         List(books, selection: $selectedBook) { book in
             NavigationLink(value: book) {

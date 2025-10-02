@@ -12,10 +12,13 @@ struct ChapterDTO: Codable {
 
 
 extension ChapterDTO {
-    func toModel() -> Chapter {
+    func toModel(order: Int) -> Chapter {
         Chapter(
             chapterNumber: chapterNumber,
-            verses: verses.map { $0.toModel() }
+            order: order,
+            verses: verses.enumerated().map { idx, verse in
+                verse.toModel(order: idx)
+            }
         )
     }
 }

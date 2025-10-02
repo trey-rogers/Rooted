@@ -13,10 +13,12 @@ class Verse {
     @Attribute(.unique) var id: UUID
     var verseNumber: Int
     var text: String
+    var order: Int   // <-- NEW
 
-    init(id: UUID = UUID(), verseNumber: Int, text: String) {
+    init(id: UUID = UUID(), verseNumber: Int, text: String, order: Int) {
         self.id = id
         self.verseNumber = verseNumber
         self.text = text
+        self.order = order
     }
 }
