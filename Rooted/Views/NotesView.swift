@@ -37,7 +37,6 @@ struct NotesView: View {
             }
         }
         .frame(width: isExpanded ? 250 : 14)
-        .cornerRadius(isExpanded ? 10 : 0)
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
     }
 }
