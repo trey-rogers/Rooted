@@ -7,11 +7,11 @@
 import SwiftUI
 
 struct ChaptersSidebarView: View {
-    var viewModel: ChaptersViewModel
+    var book: Book
     @Binding var selectedChapter: Chapter?
     
     var body: some View {
-        List(viewModel.chapters, selection: $selectedChapter) { chapter in
+        List(book.chapters, selection: $selectedChapter) { chapter in
             NavigationLink(value: chapter) {
                 Text("Chapter \(chapter.chapterNumber)")
             }

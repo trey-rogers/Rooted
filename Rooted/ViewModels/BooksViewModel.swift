@@ -11,7 +11,8 @@ import Observation
 @Observable
 class BooksViewModel {
     var books: [Book]
-    init(bible: Bible) {
-        self.books = bible.books
+
+    init(books: [Book]) {
+        self.books = books
     }
 }

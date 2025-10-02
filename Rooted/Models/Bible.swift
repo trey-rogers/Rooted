@@ -8,5 +8,5 @@ import Foundation
 
 // MARK: - Bible
 struct Bible: Codable {
-    let books: [Book]
+    let books: [BookDTO]
 }

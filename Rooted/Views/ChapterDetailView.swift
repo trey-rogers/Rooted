@@ -7,15 +7,14 @@
 import SwiftUI
 
 struct ChapterDetailView: View {
-    var viewModel: ChapterDetailViewModel
-    @State var notesVM = NotesViewModel()
+    @Bindable var chapter: Chapter
     var bookName: String
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             ScrollView {
                 VStack(alignment: .leading) {
-                    ForEach(viewModel.chapter.verses, id: \.verseNumber) { verse in
+                    ForEach(chapter.verses, id: \.id) { verse in
                         Text("\(verse.verseNumber) \(verse.text)")
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
@@ -23,11 +22,19 @@ struct ChapterDetailView: View {
                 .padding()
             }
             
-            NotesView(viewModel: notesVM)
+            VStack(alignment: .leading) {
+                Text("Notes").font(.headline)
+                TextEditor(text: $chapter.note)
+                    .frame(minHeight: 200)
+                    .border(Color.secondary)
+            }
+            .frame(width: 250)
+            .padding()
         }
         .padding()
         .navigationTitle(
-            "\(bookName) \(viewModel.chapter.chapterNumber):1-\(viewModel.chapter.verses.count)"
+            "\(bookName) \(chapter.chapterNumber):1-\(chapter.verses.count)"
         )
     }
 }
+

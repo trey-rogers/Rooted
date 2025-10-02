@@ -5,15 +5,20 @@
 //  Created by Trey Rogers on 9/29/25.
 //
 import Foundation
+import SwiftData
 
 // MARK: - Chapter
-struct Chapter: Codable, Identifiable, Hashable, Equatable {
-    let id: UUID = UUID()
-    let chapterNumber: Int
-    let verses: [Verse]
-    let note: String = ""
-    
-    enum CodingKeys: String, CodingKey {
-        case chapterNumber, verses
+@Model
+class Chapter {
+    @Attribute(.unique) var id: UUID
+    var chapterNumber: Int
+    @Relationship(deleteRule: .cascade) var verses: [Verse]
+    var note: String
+
+    init(id: UUID = UUID(), chapterNumber: Int, verses: [Verse], note: String = "") {
+        self.id = id
+        self.chapterNumber = chapterNumber
+        self.verses = verses
+        self.note = note
     }
 }

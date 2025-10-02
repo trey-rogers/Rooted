@@ -7,56 +7,34 @@
 
 import SwiftUI
 import Foundation
+import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var context
     @State private var selectedBook: Book?
     @State private var selectedChapter: Chapter?
     
-    let bible = BibleProvider.shared
-    
     var body: some View {
         NavigationSplitView {
-            BooksSidebarView(
-                viewModel: BooksViewModel(bible: bible),
-                selectedBook: $selectedBook
-            )
+            BooksSidebarView(selectedBook: $selectedBook)
         } content: {
             if let book = selectedBook {
-                ChaptersSidebarView(
-                    viewModel: ChaptersViewModel(book: book),
-                    selectedChapter: $selectedChapter
-                )
+                ChaptersSidebarView(book: book, selectedChapter: $selectedChapter)
             } else {
-                VStack {
-                    Image(systemName: "hand.tap")
-                        .resizable()
-                        .frame(width: 100, height: 100)
-                    Text("Select a Book")
-                        .font(.title2)
-                }
-                .opacity(0.25)
+                PlaceholderView(text: "Select a Book")
             }
         } detail: {
             if let chapter = selectedChapter, let book = selectedBook {
-                ChapterDetailView(
-                    viewModel: ChapterDetailViewModel(chapter: chapter),
-                    bookName: book.name
-                )
+                ChapterDetailView(chapter: chapter, bookName: book.name)
             } else {
-                VStack {
-                    Image(systemName: "hand.tap")
-                        .resizable()
-                        .frame(width: 100, height: 100)
-                    Text("Select a Chapter")
-                        .font(.title2)
-                }
-                .opacity(0.25)
+                PlaceholderView(text: "Select a Chapter")
             }
+        }
+        .task {
+            BibleProvider.loadData(context: context)
         }
     }
 }
-
-
 
 
 #Preview {
