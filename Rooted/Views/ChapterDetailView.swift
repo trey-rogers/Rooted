@@ -9,7 +9,7 @@ import SwiftUI
 struct ChapterDetailView: View {
     @Bindable var chapter: Chapter
     var bookName: String
-    
+
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             ScrollView {
@@ -21,15 +21,9 @@ struct ChapterDetailView: View {
                 }
                 .padding()
             }
-            
-            VStack(alignment: .leading) {
-                Text("Notes").font(.headline)
-                TextEditor(text: $chapter.note)
-                    .frame(minHeight: 200)
-                    .border(Color.secondary)
-            }
-            .frame(width: 250)
-            .padding()
+
+            // Notes sidebar
+            NotesView(chapter: chapter)
         }
         .padding()
         .navigationTitle(
@@ -37,4 +31,3 @@ struct ChapterDetailView: View {
         )
     }
 }
-

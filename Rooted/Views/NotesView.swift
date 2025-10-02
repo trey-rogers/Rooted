@@ -7,36 +7,41 @@
 import SwiftUI
 
 struct NotesView: View {
-    @Bindable var viewModel: NotesViewModel
-    
+    @Bindable var chapter: Chapter   // <-- directly bind to SwiftData model
+    @State private var isExpanded: Bool = true
+
     var body: some View {
         ZStack(alignment: .topLeading) {
-            if viewModel.isExpanded {
-                VStack(alignment: .leading, spacing: 8) {
+            if isExpanded {
+                VStack {
                     HStack {
-                        Button { viewModel.isExpanded.toggle() } label: {
-                            Image(systemName: "chevron.right")
+                        Text("Notes")
+                            .font(.headline)
+                        Spacer()
+                        Button { isExpanded.toggle() } label: {
+                            Image(systemName: "list.clipboard")
+                                .tint(.primary)
                         }
-                        Text("Notes").font(.headline)
                     }
-                    TextEditor(text: $viewModel.text)
+                    TextEditor(text: $chapter.note)
                         .frame(minHeight: 200)
                         .border(Color.secondary)
                 }
                 .padding()
             } else {
                 VStack {
-                    Button { viewModel.isExpanded.toggle() } label: {
-                        Image(systemName: "chevron.left")
-                            .padding(.top, 8)
+                    Button { isExpanded.toggle() } label: {
+                        Image(systemName: "list.clipboard.fill")
+                            .tint(.primary)
                     }
                     Spacer()
                 }
+                .padding()
             }
         }
-        .frame(width: viewModel.isExpanded ? 250 : 32)
-        .background(Color(.secondarySystemBackground))
+        .frame(width: isExpanded ? 250 : 36)
+        .background(isExpanded ? Color(.secondarySystemBackground) : .clear)
         .cornerRadius(10)
-        .animation(.easeInOut(duration: 0.2), value: viewModel.isExpanded)
+        .animation(.easeInOut(duration: 0.2), value: isExpanded)
     }
 }
