@@ -21,8 +21,6 @@ struct ChapterDetailView: View {
                 }
                 .padding()
             }
-
-            // Notes sidebar
             NotesView(chapter: chapter)
         }
         .padding()

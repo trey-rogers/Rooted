@@ -4,10 +4,11 @@
 //
 //  Created by Trey Rogers on 10/1/25.
 //
+
 import SwiftUI
 
 struct NotesView: View {
-    @Bindable var chapter: Chapter   // <-- directly bind to SwiftData model
+    @Bindable var chapter: Chapter
     @State private var isExpanded: Bool = true
 
     var body: some View {
