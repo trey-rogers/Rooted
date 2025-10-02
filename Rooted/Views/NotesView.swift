@@ -27,21 +27,17 @@ struct NotesView: View {
                         .frame(minHeight: 200)
                         .border(Color.secondary)
                 }
-                .padding()
             } else {
-                VStack {
+                ZStack {
                     Button { isExpanded.toggle() } label: {
                         Image(systemName: "list.clipboard.fill")
                             .tint(.primary)
                     }
-                    Spacer()
                 }
-                .padding()
             }
         }
-        .frame(width: isExpanded ? 250 : 36)
-        .background(isExpanded ? Color(.secondarySystemBackground) : .clear)
-        .cornerRadius(10)
+        .frame(width: isExpanded ? 250 : 14)
+        .cornerRadius(isExpanded ? 10 : 0)
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
     }
 }
