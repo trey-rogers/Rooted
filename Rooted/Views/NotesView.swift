@@ -10,6 +10,7 @@ import SwiftUI
 struct NotesView: View {
     @Bindable var chapter: Chapter
     @State private var isExpanded: Bool = true
+    @State private var isDrawSheetPresented = false
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -23,6 +24,12 @@ struct NotesView: View {
                             Image(systemName: "list.clipboard")
                                 .tint(.primary)
                         }
+                        Button(action: { isDrawSheetPresented = true }) {
+                            Image(systemName: "pencil.line")
+                                .imageScale(.large)
+                                .tint(.primary)
+                                .accessibilityLabel("Show Draw Notes")
+                        }
                     }
                     TextEditor(text: $chapter.note)
                         .frame(minHeight: 200)
@@ -30,12 +37,26 @@ struct NotesView: View {
                 }
             } else {
                 ZStack {
-                    Button { isExpanded.toggle() } label: {
-                        Image(systemName: "list.clipboard.fill")
-                            .tint(.primary)
+                    HStack {
+                        Button { isExpanded.toggle() } label: {
+                            Image(systemName: "list.clipboard.fill")
+                                .tint(.primary)
+                        }
+                        Button(action: { isDrawSheetPresented = true }) {
+                            Image(systemName: "pencil.line")
+                                .imageScale(.large)
+                                .tint(.primary)
+                                .accessibilityLabel("Show Draw Notes")
+                        }
                     }
+                    
                 }
             }
+        }
+        .sheet(isPresented: $isDrawSheetPresented) {
+            VStack {}
+                .presentationDetents([.fraction(0.85)])
+                .presentationSizing(.page)
         }
         .frame(width: isExpanded ? 250 : 14)
         .animation(.easeInOut(duration: 0.2), value: isExpanded)
