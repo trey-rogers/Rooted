@@ -13,52 +13,48 @@ struct NotesView: View {
     @State private var isDrawSheetPresented = false
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        VStack {
             if isExpanded {
-                VStack {
                     HStack {
                         Text("Notes")
                             .font(.headline)
                         Spacer()
-                        Button { isExpanded.toggle() } label: {
-                            Image(systemName: "list.clipboard")
-                                .tint(.primary)
-                        }
-                        Button(action: { isDrawSheetPresented = true }) {
-                            Image(systemName: "pencil.line")
-                                .imageScale(.large)
-                                .tint(.primary)
-                                .accessibilityLabel("Show Draw Notes")
-                        }
+                        NotesToolbar(isExpanded: isExpanded, onToggleNotes: { isExpanded.toggle() }, onShowDraw: { isDrawSheetPresented = true })
                     }
                     TextEditor(text: $chapter.note)
                         .frame(minHeight: 200)
                         .border(Color.secondary)
-                }
             } else {
-                ZStack {
-                    HStack {
-                        Button { isExpanded.toggle() } label: {
-                            Image(systemName: "list.clipboard.fill")
-                                .tint(.primary)
-                        }
-                        Button(action: { isDrawSheetPresented = true }) {
-                            Image(systemName: "pencil.line")
-                                .imageScale(.large)
-                                .tint(.primary)
-                                .accessibilityLabel("Show Draw Notes")
-                        }
-                    }
-                    
-                }
+                NotesToolbar(isExpanded: isExpanded, onToggleNotes: { isExpanded.toggle() }, onShowDraw: { isDrawSheetPresented = true })
             }
         }
         .sheet(isPresented: $isDrawSheetPresented) {
-            VStack {}
+            Text("Placeholder, this will contain a drawable area that's saved")
                 .presentationDetents([.fraction(0.85)])
                 .presentationSizing(.page)
         }
-        .frame(width: isExpanded ? 250 : 14)
-        .animation(.easeInOut(duration: 0.2), value: isExpanded)
+    }
+
+    // MARK: - Toolbar
+
+    private struct NotesToolbar: View {
+        let isExpanded: Bool
+        let onToggleNotes: () -> Void
+        let onShowDraw: () -> Void
+
+        var body: some View {
+            HStack {
+                Button(action: onToggleNotes) {
+                    Image(systemName: isExpanded ? "list.clipboard" : "list.clipboard.fill")
+                        .tint(.primary)
+                }
+                Button(action: onShowDraw) {
+                    Image(systemName: "pencil.line")
+                        .imageScale(.large)
+                        .tint(.primary)
+                        .accessibilityLabel("Show Draw Notes")
+                }
+            }
+        }
     }
 }
