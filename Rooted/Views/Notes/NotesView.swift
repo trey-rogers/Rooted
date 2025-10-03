@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 // MARK: - NotesView
 struct NotesView: View {
@@ -30,7 +31,7 @@ struct NotesView: View {
             }
         }
         .sheet(isPresented: $isDrawSheetPresented) {
-            Text("Placeholder, this will contain a drawable area that's saved")
+            DrawingEditorSheet(drawingData: $chapter.drawnNote)
                 .presentationDetents([.fraction(0.85)])
                 .presentationSizing(.page)
         }
