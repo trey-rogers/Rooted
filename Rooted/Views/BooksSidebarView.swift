@@ -15,6 +15,8 @@ struct BooksSidebarView: View {
         List(books, selection: $selectedBook) { book in
             NavigationLink(value: book) {
                 Text(book.name)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
             }
         }
         .navigationTitle("Books")

@@ -14,6 +14,7 @@ struct ChaptersSidebarView: View {
         List(book.chapters.sorted(by: { $0.order < $1.order }), selection: $selectedChapter) { chapter in
             NavigationLink(value: chapter) {
                 Text("Chapter \(chapter.chapterNumber)")
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .navigationTitle("Chapters")
