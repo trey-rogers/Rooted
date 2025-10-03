@@ -11,19 +11,19 @@ struct NotesView: View {
     @Bindable var chapter: Chapter
     @State private var isExpanded: Bool = true
     @State private var isDrawSheetPresented = false
-
+    
     var body: some View {
         VStack {
             if isExpanded {
-                    HStack {
-                        Text("Notes")
-                            .font(.headline)
-                        Spacer()
-                        NotesToolbar(isExpanded: isExpanded, onToggleNotes: { isExpanded.toggle() }, onShowDraw: { isDrawSheetPresented = true })
-                    }
-                    TextEditor(text: $chapter.note)
-                        .frame(minHeight: 200)
-                        .border(Color.secondary)
+                HStack {
+                    Text("Notes")
+                        .font(.headline)
+                    Spacer()
+                    NotesToolbar(isExpanded: isExpanded, onToggleNotes: { isExpanded.toggle() }, onShowDraw: { isDrawSheetPresented = true })
+                }
+                TextEditor(text: $chapter.note)
+                    .frame(minHeight: 200)
+                    .border(Color.secondary)
             } else {
                 NotesToolbar(isExpanded: isExpanded, onToggleNotes: { isExpanded.toggle() }, onShowDraw: { isDrawSheetPresented = true })
             }
@@ -34,14 +34,14 @@ struct NotesView: View {
                 .presentationSizing(.page)
         }
     }
-
+    
     // MARK: - Toolbar
-
+    
     private struct NotesToolbar: View {
         let isExpanded: Bool
         let onToggleNotes: () -> Void
         let onShowDraw: () -> Void
-
+        
         var body: some View {
             HStack {
                 Button(action: onToggleNotes) {

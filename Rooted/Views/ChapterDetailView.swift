@@ -9,7 +9,7 @@ import SwiftUI
 struct ChapterDetailView: View {
     @Bindable var chapter: Chapter
     var bookName: String
-
+    
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             ScrollView {
