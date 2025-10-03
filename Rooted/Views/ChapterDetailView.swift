@@ -38,23 +38,10 @@ struct ChapterDetailView: View {
         )
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    isExpanded.toggle()
-                } label: {
-                    Image(systemName: isExpanded ? "list.clipboard" : "list.clipboard.fill")
-                        .font(.title2)
-                }
-            }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    isDrawSheetPresented = true
-                } label: {
-                    Image(systemName: "pencil.line")
-                        .font(.title2)
-                }
-            }
+            NotesToolbar(
+                isExpanded: $isExpanded,
+                isDrawSheetPresented: $isDrawSheetPresented
+            )
         }
         .sheet(isPresented: $isDrawSheetPresented) {
             DrawingEditorSheet(drawingData: $chapter.note.drawingData)

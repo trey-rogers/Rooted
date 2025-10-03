@@ -7,25 +7,27 @@
 import SwiftUI
 
 // MARK: - NotesToolbar
-//struct NotesToolbar: View {
-//    let isExpanded: Bool
-//    let onToggleNotes: () -> Void
-//    let onShowDraw: () -> Void
-//    
-//    var body: some View {
-//        HStack {
-//            Button(action: onToggleNotes) {
-//                Image(systemName: isExpanded ? "list.clipboard" : "list.clipboard.fill")
-//                    .tint(.primary)
-//                    .imageScale(.large)
-//            }
-//            Spacer()
-//            Button(action: onShowDraw) {
-//                Image(systemName: "pencil.line")
-//                    .tint(.primary)
-//                    .accessibilityLabel("Show Draw Notes")
-//                    .imageScale(.large)
-//            }
-//        }
-//    }
-//}
+struct NotesToolbar: ToolbarContent {
+    @Binding var isExpanded: Bool
+    @Binding var isDrawSheetPresented: Bool
+    
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) {
+            Button {
+                isExpanded.toggle()
+            } label: {
+                Image(systemName: isExpanded ? "list.clipboard" : "list.clipboard.fill")
+                    .font(.title2)
+            }
+        }
+        
+        ToolbarItem(placement: .navigationBarTrailing) {
+            Button {
+                isDrawSheetPresented = true
+            } label: {
+                Image(systemName: "pencil.line")
+                    .font(.title2)
+            }
+        }
+    }
+}
