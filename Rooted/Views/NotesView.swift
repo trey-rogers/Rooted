@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+// MARK: - NotesView
 struct NotesView: View {
     @Bindable var chapter: Chapter
     @State private var isExpanded: Bool = true
@@ -36,7 +37,6 @@ struct NotesView: View {
     }
     
     // MARK: - Toolbar
-    
     private struct NotesToolbar: View {
         let isExpanded: Bool
         let onToggleNotes: () -> Void
