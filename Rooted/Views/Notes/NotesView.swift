@@ -23,7 +23,7 @@ struct NotesView: View {
                     Spacer()
                     NotesToolbar(isExpanded: isExpanded, onToggleNotes: { isExpanded.toggle() }, onShowDraw: { isDrawSheetPresented = true })
                 }
-                TextEditor(text: $chapter.note)
+                TextEditor(text: $chapter.note.text)
                     .frame(minHeight: 200)
                     .border(Color.secondary)
             } else {
@@ -31,7 +31,7 @@ struct NotesView: View {
             }
         }
         .sheet(isPresented: $isDrawSheetPresented) {
-            DrawingEditorSheet(drawingData: $chapter.drawnNote)
+            DrawingEditorSheet(drawingData: $chapter.note.drawingData)
                 .presentationDetents([.fraction(0.85)])
                 .presentationSizing(.page)
         }
@@ -59,3 +59,4 @@ struct NotesView: View {
         }
     }
 }
+
