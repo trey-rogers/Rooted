@@ -45,7 +45,7 @@ struct ChapterDetailView: View {
         }
         .sheet(isPresented: $isDrawSheetPresented) {
             DrawingEditorSheet(drawingData: $chapter.note.drawingData)
-                .presentationDetents([.fraction(0.85)])
+                .presentationDetents([.large])
                 .presentationSizing(.page)
         }
     }
