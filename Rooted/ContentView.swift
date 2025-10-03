@@ -13,9 +13,10 @@ struct ContentView: View {
     @Environment(\.modelContext) private var context
     @State private var selectedBook: Book?
     @State private var selectedChapter: Chapter?
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
     
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             BooksSidebarView(selectedBook: $selectedBook)
         } content: {
             if let book = selectedBook {
@@ -28,6 +29,11 @@ struct ContentView: View {
                 ChapterDetailView(chapter: chapter, bookName: book.name)
             } else {
                 PlaceholderView(text: "Select a Chapter")
+            }
+        }
+        .onChange(of: selectedChapter) { _, newChapter in
+            if newChapter != nil {
+                columnVisibility = .detailOnly
             }
         }
         .task {
