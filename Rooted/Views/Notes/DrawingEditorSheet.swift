@@ -38,8 +38,8 @@ struct DrawingEditorSheet: View {
                     .disabled(drawingData == nil)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Toggle("Show Tool Picker", isOn: $showToolPicker)
+                    Button {
+                        showToolPicker.toggle()
                     } label: {
                         Image(systemName: showToolPicker ? "paintpalette.fill" : "paintpalette")
                     }
