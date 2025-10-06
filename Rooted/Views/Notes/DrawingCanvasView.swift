@@ -6,35 +6,34 @@ import UIKit
 // A SwiftUI wrapper around PKCanvasView with pinch-to-zoom via UIScrollView
 // and an expanded drawable area so users can pan/draw beyond the initial viewport.
 struct DrawingCanvasView: UIViewRepresentable {
-    // Use @Binding for idiomatic SwiftUI bindings
+    // SwiftUI bindings
     @Binding var data: Data?
+    @Binding var zoomScale: CGFloat
+    @Binding var contentOffset: CGPoint
+    @Binding var canvasSize: CGSize
 
-    // Zoom and drawing configuration
+    // Configuration
     var drawingPolicy: PKCanvasViewDrawingPolicy = .pencilOnly
-
     var minZoomScale: CGFloat = 0.25
     var maxZoomScale: CGFloat = 4.0
-    var initialZoomScale: CGFloat = 1.0
-
-    // Drawable canvas size (logical points)
-    // Provide a large default so users can pan and draw outside the initial visible area.
-    var canvasSize: CGSize = CGSize(width: 8000, height: 8000)
 
     // MARK: - Initializer
     init(
         data: Binding<Data?>,
+        zoomScale: Binding<CGFloat> = .constant(1.0),
+        contentOffset: Binding<CGPoint> = .constant(.zero),
+        canvasSize: Binding<CGSize> = .constant(CGSize(width: 8000, height: 8000)),
         drawingPolicy: PKCanvasViewDrawingPolicy = .pencilOnly,
         minZoomScale: CGFloat = 0.25,
-        maxZoomScale: CGFloat = 4.0,
-        initialZoomScale: CGFloat = 1.0,
-        canvasSize: CGSize = CGSize(width: 8000, height: 8000)
+        maxZoomScale: CGFloat = 4.0
     ) {
         self._data = data
+        self._zoomScale = zoomScale
+        self._contentOffset = contentOffset
+        self._canvasSize = canvasSize
         self.drawingPolicy = drawingPolicy
         self.minZoomScale = minZoomScale
         self.maxZoomScale = maxZoomScale
-        self.initialZoomScale = initialZoomScale
-        self.canvasSize = canvasSize
     }
 
     func makeUIView(context: Context) -> PKCanvasView {
@@ -43,15 +42,12 @@ struct DrawingCanvasView: UIViewRepresentable {
         canvas.drawingPolicy = drawingPolicy
         canvas.delegate = context.coordinator
 
-        // PKCanvasView is a UIScrollView; configure zooming and panning here
+        // Zoom configuration
         canvas.minimumZoomScale = minZoomScale
         canvas.maximumZoomScale = maxZoomScale
 
         // Require two fingers to pan so one finger (or pencil) is reserved for drawing
         canvas.panGestureRecognizer.minimumNumberOfTouches = 2
-
-        // Often unnecessary in SwiftUI, but harmless if you need it
-        canvas.contentInsetAdjustmentBehavior = .never
 
         // Provide a large drawable content area so the user can pan and draw freely
         canvas.contentSize = canvasSize
@@ -64,9 +60,13 @@ struct DrawingCanvasView: UIViewRepresentable {
             context.coordinator.lastEncoded = d
         }
 
-        // Clamp and apply initial zoom
-        let clampedInitial = max(minZoomScale, min(maxZoomScale, initialZoomScale))
-        canvas.zoomScale = clampedInitial
+        // Apply initial zoom from binding (clamped)
+        let clampedZoom = clamp(zoomScale, min: minZoomScale, max: maxZoomScale)
+        if zoomScale != clampedZoom { self.zoomScale = clampedZoom }
+        canvas.zoomScale = clampedZoom
+
+        // Apply initial content offset (will be clamped after layout in update)
+        canvas.contentOffset = contentOffset
 
         return canvas
     }
@@ -84,14 +84,31 @@ struct DrawingCanvasView: UIViewRepresentable {
             canvas.maximumZoomScale = maxZoomScale
         }
 
-        // Clamp zoom if bounds changed
-        if canvas.zoomScale < minZoomScale || canvas.zoomScale > maxZoomScale {
-            canvas.zoomScale = max(minZoomScale, min(maxZoomScale, canvas.zoomScale))
+        // Clamp binding zoom if out of bounds and apply to canvas if needed
+        let clampedZoom = clamp(zoomScale, min: minZoomScale, max: maxZoomScale)
+        if !approxEqual(zoomScale, clampedZoom) {
+            zoomScale = clampedZoom
+        }
+        if !approxEqual(canvas.zoomScale, clampedZoom) {
+            context.coordinator.performWithoutNotifying {
+                canvas.zoomScale = clampedZoom
+            }
         }
 
         // Ensure contentSize stays in sync with the configured canvas size
         if canvas.contentSize != canvasSize {
             canvas.contentSize = canvasSize
+        }
+
+        // Clamp and apply content offset from binding
+        let clampedOffset = clampContentOffset(desired: contentOffset, in: canvas)
+        if !approxEqual(canvas.contentOffset, clampedOffset) {
+            context.coordinator.performWithoutNotifying {
+                canvas.contentOffset = clampedOffset
+            }
+        }
+        if !approxEqual(contentOffset, clampedOffset) {
+            contentOffset = clampedOffset
         }
 
         // Sync external data into the canvas if it differs from what we last encoded
@@ -120,24 +137,55 @@ struct DrawingCanvasView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(data: $data)
+        Coordinator(data: $data, zoomScale: $zoomScale, contentOffset: $contentOffset, minZoom: minZoomScale, maxZoom: maxZoomScale)
     }
 
     // MARK: - Coordinator
     @MainActor
     final class Coordinator: NSObject, PKCanvasViewDelegate {
         var data: Binding<Data?>
+        var zoomScale: Binding<CGFloat>
+        var contentOffset: Binding<CGPoint>
         private var isUpdating = false
         var lastEncoded: Data? // cache to avoid re-encoding for equality checks
+        private let minZoom: CGFloat
+        private let maxZoom: CGFloat
 
-        init(data: Binding<Data?>) {
+        init(
+            data: Binding<Data?>,
+            zoomScale: Binding<CGFloat>,
+            contentOffset: Binding<CGPoint>,
+            minZoom: CGFloat,
+            maxZoom: CGFloat
+        ) {
             self.data = data
+            self.zoomScale = zoomScale
+            self.contentOffset = contentOffset
+            self.minZoom = minZoom
+            self.maxZoom = maxZoom
         }
 
         func performWithoutNotifying(_ action: () -> Void) {
             isUpdating = true
             action()
             isUpdating = false
+        }
+
+        // MARK: UIScrollViewDelegate via PKCanvasViewDelegate
+        func scrollViewDidZoom(_ scrollView: UIScrollView) {
+            guard !isUpdating else { return }
+            let z = max(minZoom, min(maxZoom, scrollView.zoomScale))
+            if !approxEqual(zoomScale.wrappedValue, z) {
+                zoomScale.wrappedValue = z
+            }
+        }
+
+        func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            guard !isUpdating else { return }
+            let offset = scrollView.contentOffset
+            if !approxEqual(contentOffset.wrappedValue, offset) {
+                contentOffset.wrappedValue = offset
+            }
         }
 
         // MARK: PKCanvasViewDelegate
@@ -148,4 +196,30 @@ struct DrawingCanvasView: UIViewRepresentable {
             data.wrappedValue = encoded
         }
     }
+}
+
+// MARK: - Helpers
+private func clamp(_ value: CGFloat, min: CGFloat, max: CGFloat) -> CGFloat {
+    return Swift.max(min, Swift.min(max, value))
+}
+
+private func approxEqual(_ a: CGFloat, _ b: CGFloat, epsilon: CGFloat = 0.0001) -> Bool {
+    return abs(a - b) <= epsilon
+}
+
+private func approxEqual(_ a: CGPoint, _ b: CGPoint, epsilon: CGFloat = 0.5) -> Bool {
+    return approxEqual(a.x, b.x, epsilon: epsilon) && approxEqual(a.y, b.y, epsilon: epsilon)
+}
+
+private func clampContentOffset(desired: CGPoint, in scrollView: UIScrollView) -> CGPoint {
+    let boundsSize = scrollView.bounds.size
+    let contentSize = scrollView.contentSize
+
+    let maxX = max(0, contentSize.width - boundsSize.width)
+    let maxY = max(0, contentSize.height - boundsSize.height)
+
+    let clampedX = min(max(0, desired.x), maxX)
+    let clampedY = min(max(0, desired.y), maxY)
+
+    return CGPoint(x: clampedX, y: clampedY)
 }
