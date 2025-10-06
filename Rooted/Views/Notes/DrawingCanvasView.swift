@@ -16,6 +16,7 @@ struct DrawingCanvasView: UIViewRepresentable {
     var drawingPolicy: PKCanvasViewDrawingPolicy = .pencilOnly
     var minZoomScale: CGFloat = 0.25
     var maxZoomScale: CGFloat = 4.0
+    var showsSystemToolPicker: Bool = true
 
     // MARK: - Initializer
     init(
@@ -25,7 +26,8 @@ struct DrawingCanvasView: UIViewRepresentable {
         canvasSize: Binding<CGSize> = .constant(CGSize(width: 8000, height: 8000)),
         drawingPolicy: PKCanvasViewDrawingPolicy = .pencilOnly,
         minZoomScale: CGFloat = 0.25,
-        maxZoomScale: CGFloat = 4.0
+        maxZoomScale: CGFloat = 4.0,
+        showsSystemToolPicker: Bool = true
     ) {
         self._data = data
         self._zoomScale = zoomScale
@@ -34,6 +36,7 @@ struct DrawingCanvasView: UIViewRepresentable {
         self.drawingPolicy = drawingPolicy
         self.minZoomScale = minZoomScale
         self.maxZoomScale = maxZoomScale
+        self.showsSystemToolPicker = showsSystemToolPicker
     }
 
     func makeUIView(context: Context) -> PKCanvasView {
@@ -130,14 +133,27 @@ struct DrawingCanvasView: UIViewRepresentable {
             }
             coordinator.lastEncoded = nil
         }
+
+        // Manage system tool picker visibility after the canvas is attached to a window
+        DispatchQueue.main.async {
+            coordinator.updateToolPickerVisibility(for: canvas, visible: showsSystemToolPicker)
+        }
     }
 
     static func dismantleUIView(_ uiView: PKCanvasView, coordinator: Coordinator) {
+        // Hide and detach the tool picker, then clear delegate
+        coordinator.updateToolPickerVisibility(for: uiView, visible: false)
         uiView.delegate = nil
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(data: $data, zoomScale: $zoomScale, contentOffset: $contentOffset, minZoom: minZoomScale, maxZoom: maxZoomScale)
+        Coordinator(
+            data: $data,
+            zoomScale: $zoomScale,
+            contentOffset: $contentOffset,
+            minZoom: minZoomScale,
+            maxZoom: maxZoomScale
+        )
     }
 
     // MARK: - Coordinator
@@ -150,6 +166,10 @@ struct DrawingCanvasView: UIViewRepresentable {
         var lastEncoded: Data? // cache to avoid re-encoding for equality checks
         private let minZoom: CGFloat
         private let maxZoom: CGFloat
+
+        // System tool picker management
+        private var toolPicker: PKToolPicker?
+        private var isToolPickerVisible: Bool = false
 
         init(
             data: Binding<Data?>,
@@ -169,6 +189,31 @@ struct DrawingCanvasView: UIViewRepresentable {
             isUpdating = true
             action()
             isUpdating = false
+        }
+
+        // MARK: System Tool Picker
+        func updateToolPickerVisibility(for canvas: PKCanvasView, visible: Bool) {
+            if visible {
+                guard let window = canvas.window else { return }
+                if toolPicker == nil {
+                    toolPicker = PKToolPicker.shared(for: window)
+                }
+                guard let picker = toolPicker else { return }
+                // Attach and show
+                if !isToolPickerVisible {
+                    picker.setVisible(true, forFirstResponder: canvas)
+                    picker.addObserver(canvas)
+                    canvas.becomeFirstResponder()
+                    isToolPickerVisible = true
+                }
+            } else {
+                guard let picker = toolPicker else { return }
+                if isToolPickerVisible {
+                    picker.setVisible(false, forFirstResponder: canvas)
+                    picker.removeObserver(canvas)
+                    isToolPickerVisible = false
+                }
+            }
         }
 
         // MARK: UIScrollViewDelegate via PKCanvasViewDelegate

@@ -13,6 +13,7 @@ struct DrawingEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Binding var drawingData: Data?
+    @State private var showToolPicker: Bool = true
     
     var body: some View {
         NavigationStack {
@@ -20,8 +21,12 @@ struct DrawingEditorSheet: View {
                 // Light background to contrast ink
                 Color(.systemBackground)
                     .ignoresSafeArea()
-                DrawingCanvasView(data: $drawingData, drawingPolicy: .anyInput)
-                    .ignoresSafeArea(edges: .bottom)
+                DrawingCanvasView(
+                    data: $drawingData,
+                    drawingPolicy: .anyInput,
+                    showsSystemToolPicker: showToolPicker
+                )
+                .ignoresSafeArea(edges: .bottom)
             }
             .navigationTitle("Draw Notes")
             .navigationBarTitleDisplayMode(.inline)
@@ -31,6 +36,13 @@ struct DrawingEditorSheet: View {
                         drawingData = nil
                     }
                     .disabled(drawingData == nil)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Toggle("Show Tool Picker", isOn: $showToolPicker)
+                    } label: {
+                        Image(systemName: showToolPicker ? "paintpalette.fill" : "paintpalette")
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
