@@ -16,8 +16,6 @@ struct ChapterDetailView: View {
     @State private var isDrawSheetPresented = false
     @State private var isDrawModeEnabled: Bool = false // Manage draw mode state
     
-    @State private var zoomScale: CGFloat = 1.0
-    @State private var contentOffset: CGPoint = .zero
     @State private var canvasSize: CGSize = CGSize(width: 1200, height: 2000)
     
     var body: some View {
@@ -34,15 +32,10 @@ struct ChapterDetailView: View {
                     .padding()
                     
                     if isDrawModeEnabled {
-                        DrawingCanvasView(
+                        DrawingCanvasView.overlay(
                             data: $chapter.note.detailDrawingData,
-                            zoomScale: $zoomScale,
-                            contentOffset: $contentOffset,
-                            canvasSize: $canvasSize,
-                            drawingPolicy: .anyInput,
-                            minZoomScale: 1.0,
-                            maxZoomScale: 1.0,
-                            showsSystemToolPicker: true
+                            size: canvasSize,
+                            showsSystemToolPicker: isDrawModeEnabled
                         )
                         .allowsHitTesting(true)
                         .background(Color.clear)

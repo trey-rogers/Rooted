@@ -13,7 +13,7 @@ struct DrawingCanvasView: UIViewRepresentable {
     @Binding var canvasSize: CGSize
 
     // Configuration
-    var drawingPolicy: PKCanvasViewDrawingPolicy = .pencilOnly
+    var drawingPolicy: PKCanvasViewDrawingPolicy = .anyInput
     var minZoomScale: CGFloat = 0.25
     var maxZoomScale: CGFloat = 4.0
     var showsSystemToolPicker: Bool = true
@@ -135,14 +135,12 @@ struct DrawingCanvasView: UIViewRepresentable {
         }
 
         // Manage system tool picker visibility after the canvas is attached to a window
-        DispatchQueue.main.async {
-            coordinator.updateToolPickerVisibility(for: canvas, visible: showsSystemToolPicker)
-        }
+        coordinator.updateToolPickerVisibility(for: canvas, visible: showsSystemToolPicker)
     }
 
     static func dismantleUIView(_ uiView: PKCanvasView, coordinator: Coordinator) {
-        // Hide and detach the tool picker, then clear delegate
         coordinator.updateToolPickerVisibility(for: uiView, visible: false)
+        coordinator.toolPicker = nil
         uiView.delegate = nil
     }
 
@@ -168,8 +166,9 @@ struct DrawingCanvasView: UIViewRepresentable {
         private let maxZoom: CGFloat
 
         // System tool picker management
-        private var toolPicker: PKToolPicker?
+        var toolPicker: PKToolPicker?
         private var isToolPickerVisible: Bool = false
+        private var lastRequestedToolPickerVisible: Bool = false
 
         init(
             data: Binding<Data?>,
@@ -193,21 +192,32 @@ struct DrawingCanvasView: UIViewRepresentable {
 
         // MARK: System Tool Picker
         func updateToolPickerVisibility(for canvas: PKCanvasView, visible: Bool) {
-            if visible {
-                guard let window = canvas.window else { return }
-                if toolPicker == nil {
-                    toolPicker = PKToolPicker.shared(for: window)
+            lastRequestedToolPickerVisible = visible
+            
+            // Wait until canvas is attached to a window
+            guard let window = canvas.window else {
+                // Retry once the view is in a window
+                DispatchQueue.main.async { [weak self, weak canvas] in
+                    if let self, let canvas {
+                        self.updateToolPickerVisibility(for: canvas, visible: visible)
+                    }
                 }
-                guard let picker = toolPicker else { return }
-                // Attach and show
+                return
+            }
+            
+            if toolPicker == nil {
+                toolPicker = PKToolPicker.shared(for: window)
+            }
+            guard let picker = toolPicker else { return }
+
+            if visible {
                 if !isToolPickerVisible {
-                    picker.setVisible(true, forFirstResponder: canvas)
                     picker.addObserver(canvas)
+                    picker.setVisible(true, forFirstResponder: canvas)
                     canvas.becomeFirstResponder()
                     isToolPickerVisible = true
                 }
             } else {
-                guard let picker = toolPicker else { return }
                 if isToolPickerVisible {
                     picker.setVisible(false, forFirstResponder: canvas)
                     picker.removeObserver(canvas)
@@ -215,6 +225,7 @@ struct DrawingCanvasView: UIViewRepresentable {
                 }
             }
         }
+
 
         // MARK: UIScrollViewDelegate via PKCanvasViewDelegate
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -237,9 +248,33 @@ struct DrawingCanvasView: UIViewRepresentable {
         func canvasViewDrawingDidChange(_ canvasView: PKCanvasView) {
             guard !isUpdating else { return }
             let encoded = canvasView.drawing.dataRepresentation()
+            if let last = lastEncoded, last == encoded {
+                return
+            }
             lastEncoded = encoded
             data.wrappedValue = encoded
         }
+    }
+}
+
+// MARK: - Convenience
+extension DrawingCanvasView {
+    /// A convenience factory for an overlay-style canvas with fixed zoom and any input policy.
+    static func overlay(
+        data: Binding<Data?>,
+        size: CGSize = CGSize(width: 1200, height: 2000),
+        showsSystemToolPicker: Bool = true
+    ) -> DrawingCanvasView {
+        DrawingCanvasView(
+            data: data,
+            zoomScale: .constant(1.0),
+            contentOffset: .constant(.zero),
+            canvasSize: .constant(size),
+            drawingPolicy: .anyInput,
+            minZoomScale: 1.0,
+            maxZoomScale: 1.0,
+            showsSystemToolPicker: showsSystemToolPicker
+        )
     }
 }
 
@@ -268,3 +303,4 @@ private func clampContentOffset(desired: CGPoint, in scrollView: UIScrollView) -
 
     return CGPoint(x: clampedX, y: clampedY)
 }
+
