@@ -14,9 +14,12 @@ struct Note: Codable, Hashable, Sendable {
     var text: String
     /// Optional binary data representing a drawing or sketch associated with the note.
     var drawingData: Data?
+    /// Optional binary data representing a drawing or sketch associated with the detail screen.
+    var detailDrawingData: Data?
 
-    init(text: String = "", drawingData: Data? = nil) {
+    init(text: String = "", drawingData: Data? = nil, detailDrawingData: Data? = nil) {
         self.text = text
         self.drawingData = drawingData
+        self.detailDrawingData = detailDrawingData
     }
 }

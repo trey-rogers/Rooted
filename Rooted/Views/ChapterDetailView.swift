@@ -35,11 +35,13 @@ struct ChapterDetailView: View {
                     
                     if isDrawModeEnabled {
                         DrawingCanvasView(
-                            data: $chapter.note.drawingData,
+                            data: $chapter.note.detailDrawingData,
                             zoomScale: $zoomScale,
                             contentOffset: $contentOffset,
                             canvasSize: $canvasSize,
                             drawingPolicy: .anyInput,
+                            minZoomScale: 1.0,
+                            maxZoomScale: 1.0,
                             showsSystemToolPicker: true
                         )
                         .allowsHitTesting(true)
@@ -84,3 +86,4 @@ struct ChapterDetailView: View {
         }
     }
 }
+
