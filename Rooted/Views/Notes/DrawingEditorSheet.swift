@@ -14,6 +14,9 @@ struct DrawingEditorSheet: View {
     @Environment(\.modelContext) private var modelContext
     @Binding var drawingData: Data?
     @State private var showToolPicker: Bool = true
+    @State private var zoom: CGFloat = 1.0
+    @State private var offset: CGPoint = .zero
+    @State private var size: CGSize = CGSize(width: 8000, height: 8000)
     
     var body: some View {
         NavigationStack {
@@ -23,6 +26,9 @@ struct DrawingEditorSheet: View {
                     .ignoresSafeArea()
                 DrawingCanvasView(
                     data: $drawingData,
+                    zoomScale: $zoom,
+                    contentOffset: $offset,
+                    canvasSize: $size,
                     drawingPolicy: .anyInput,
                     showsSystemToolPicker: showToolPicker
                 )
